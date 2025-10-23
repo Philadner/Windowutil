@@ -1,5 +1,5 @@
 {
-  "version": "1.01",
+  "version": "1.02",
   "files": {
     ".windowutil_state.json": "f7b388001ae3ed796e63e84bba9ce4a8",
     "animations.py": "c7c3f0fcebe8e04c803a74e90f657104",
@@ -10,13 +10,13 @@
     "loader.py": "703da9eee1dfac17e32209885abc71e1",
     "manifest.json": "5b7f39ea7ee303c5b1fa0d4e3368d41a",
     "state.py": "f439f3990156cecd12f63197ba7e7c16",
-    "version.json": "41a6bf8ad7867ba2a8b1d1b1f1bf445a",
+    "version.json": "807784d5ce400556d0b7cfc4093a3699",
     "windowutil.py": "2bddb660bc9871231897fa58c20739a2",
     "extensions/centre.py": "38de647317b463cbbd39782a632d70be",
     "extensions/nudge.py": "2560057c29748eaac50d85fcba6250d8",
     "extensions/resize.py": "7359b870209d141bff22e87fabd999eb",
     "extensions/select.py": "570fce1d3e5918278e636e848219a67f",
-    "extensions/update.py": "f569d0a95156c815345d4cb81a62161c",
+    "extensions/update.py": "663d6a4aa48c8925ebdae48d536beb12",
     "extensions/__innit__.py": "0418c97913a0f938bd896b0016971b44"
   }
 }
