@@ -1,15 +1,13 @@
 from loader import load_manifest, import_command
 from state import load_selected
+
 def execute_chain(argv):
     manifest = load_manifest()
 
-    # --- NEW: split command segments by ; or , ---
-    #  e.g. ['sel', 'zen', 'nudge;', 'centre']
-    #  becomes [['sel','zen','nudge'], ['centre']]
+    # --- split command segments by ; or , ---
     segments = []
     current = []
     for arg in argv:
-        # handle multiple delimiters in one token, e.g. "nudge;"
         if ';' in arg or ',' in arg or 'then' in arg:
             cleaned = arg.rstrip(';,"then"')
             if cleaned:
@@ -21,7 +19,6 @@ def execute_chain(argv):
     if current:
         segments.append(current)
 
-    # --- execute each segment separately ---
     window = None
     for seg in segments:
         if not seg:
@@ -45,19 +42,29 @@ def execute_chain(argv):
             cmd_args = seg[i + 1 : i + 1 + args_needed]
 
             ext = import_command(entry)
+
+            # --- handle selection command ---
             if cmd_key == "select":
                 window = ext.main(*cmd_args)
+
+            # --- handle non-selection commands ---
             else:
-                if window is None and entry not in ("update", "help", "config", "build"):
-                    window = load_selected()
+                # NEW: allow some commands to run without a window
+                if cmd_key in ("update", "help", "config", "build"):
+                    ext.main(*cmd_args)
+                else:
+                    # fallback to last selected or error
                     if window is None:
-                        print("No window selected. Use 'sel <name>' first.")
-                        return
-                window = ext.main(window, *cmd_args)
+                        window = load_selected()
+                        if window is None:
+                            print("No window selected. Use 'sel <name>' first.")
+                            return
+                    window = ext.main(window, *cmd_args)
 
             i += 1 + args_needed
 
     return window
+
 
 if __name__ == "__main__":
     import sys
