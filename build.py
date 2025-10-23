@@ -56,15 +56,22 @@ else:
     dist = ROOT / "dist"
     dist.mkdir(exist_ok=True)
     try:
+        # --- inject absolute install path ---
+        install_path = str(ROOT).replace("\\", "\\\\")
+        wutil_code = (ROOT / "wutil.py").read_text(encoding="utf-8").replace("{{INSTALL_PATH}}", install_path)
+        (ROOT / "_wutil_temp.py").write_text(wutil_code, encoding="utf-8")
+        build_target = str(ROOT / "_wutil_temp.py")
+
         subprocess.run([
             "pyinstaller",
             "--onefile",
             "--distpath", str(dist),
             "--name", "wutil",
-            "wutil.py"
+            build_target
         ], check=True)
         print(f"✅ built {dist / 'wutil.exe'}")
-
+        (ROOT / "_wutil_temp.py").unlink(missing_ok=True)
+    
         # Save new hash state
         STATEFILE.write_text(json.dumps({"wutil_hash": wutil_hash}, indent=2))
     except subprocess.CalledProcessError as e:

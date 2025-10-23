@@ -3,14 +3,15 @@ import subprocess
 import sys
 from pathlib import Path
 
+# --- this constant will be replaced at build time ---
+INSTALL_PATH = "{{INSTALL_PATH}}"  
+
 def main():
     if getattr(sys, 'frozen', False):
-        # Running as compiled EXE
-        base_path = Path(sys.executable).parent
-        root = base_path.parent
-        python_exe = "python"  # always use real Python for subprocess
+        # use build-time absolute path
+        root = Path(INSTALL_PATH)
+        python_exe = "python"
     else:
-        # Running as plain Python script
         root = Path(__file__).resolve().parent
         python_exe = sys.executable
 
@@ -22,6 +23,7 @@ def main():
 
     cmd = [python_exe, str(windowutil_path), *sys.argv[1:]]
     subprocess.run(cmd)
+
 
 if __name__ == "__main__":
     main()
