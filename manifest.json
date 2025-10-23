@@ -18,5 +18,10 @@
     "args": 1,
     "short": "sel",
     "file": "select.py"
+  },
+  "update": {
+    "args": 0,
+    "short": "upd",
+    "file": "update.py"
   }
 }
