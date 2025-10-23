@@ -25,6 +25,8 @@ class Extension:
         self.args = []
 
     def main(self, window=None):
+        if window is not None:
+            print("(i) Ignoring selected window; update works globally.")
         print("🔎 Checking for WindowUtil updates...")
 
         root_dir = Path(__file__).resolve().parent.parent

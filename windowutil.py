@@ -48,7 +48,7 @@ def execute_chain(argv):
             if cmd_key == "select":
                 window = ext.main(*cmd_args)
             else:
-                if window is None:
+                if window is None and entry not in ("update", "help", "config", "build"):
                     window = load_selected()
                     if window is None:
                         print("No window selected. Use 'sel <name>' first.")
