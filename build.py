@@ -1,29 +1,17 @@
 import os
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 
-# --- CONFIG ---
 ROOT = Path(__file__).resolve().parent
 OUTFILE = ROOT / "update.json"
+STATEFILE = ROOT / ".build_state.json"
 VERSION_FILE = ROOT / "version.json"
-IGNORE = {
-    ".git",
-    ".venv",
-    "__pycache__",
-    "update.json",
-    ".gitignore",
-    ".gitattributes",
-    "dist",
-}
+IGNORE = {".git", ".venv", "__pycache__", "update.json", ".gitignore", ".gitattributes", "dist"}
+VERSION = "0.0.0"
 
-# --- LOAD VERSION ---
-if VERSION_FILE.exists():
-    version = json.loads(VERSION_FILE.read_text()).get("version", "0.0.0")
-else:
-    version = "0.0.0"
-
-# --- HASHING FUNCTION ---
+# --- Hashing helper ---
 def md5_hash(file_path: Path) -> str:
     hasher = hashlib.md5()
     with open(file_path, "rb") as f:
@@ -31,20 +19,53 @@ def md5_hash(file_path: Path) -> str:
             hasher.update(chunk)
     return hasher.hexdigest()
 
-# --- WALK PROJECT ---
+
+# --- Read version ---
+if VERSION_FILE.exists():
+    VERSION = json.loads(VERSION_FILE.read_text()).get("version", VERSION)
+
+
+# --- Walk project and hash files ---
 files = {}
 for path in ROOT.rglob("*"):
-    if path.is_file():
-        rel = path.relative_to(ROOT).as_posix()
-        if any(part in IGNORE for part in path.parts):
-            continue
-        files[rel] = md5_hash(path)
+    if path.is_file() and not any(part in IGNORE for part in path.parts):
+        files[path.relative_to(ROOT).as_posix()] = md5_hash(path)
 
-# --- WRITE OUTPUT ---
-data = {
-    "version": version,
-    "files": files,
-}
-
+data = {"version": VERSION, "files": files}
 OUTFILE.write_text(json.dumps(data, indent=2))
-print(f"✅ Wrote {len(files)} file hashes to {OUTFILE}")
+print(f"✅ wrote {len(files)} file hashes to {OUTFILE}")
+
+
+# --- Check wutil.py hash ---
+wutil = ROOT / "wutil.py"
+wutil_hash = md5_hash(wutil) if wutil.exists() else None
+last_hash = None
+
+if STATEFILE.exists():
+    try:
+        last_hash = json.loads(STATEFILE.read_text()).get("wutil_hash")
+    except Exception:
+        pass
+
+
+# --- Skip build if no changes ---
+if wutil_hash == last_hash:
+    print("⚙️  wutil.py unchanged — skipping PyInstaller build.")
+else:
+    print("⚙️  Building wutil.exe with PyInstaller...")
+    dist = ROOT / "dist"
+    dist.mkdir(exist_ok=True)
+    try:
+        subprocess.run([
+            "pyinstaller",
+            "--onefile",
+            "--distpath", str(dist),
+            "--name", "wutil",
+            "wutil.py"
+        ], check=True)
+        print(f"✅ built {dist / 'wutil.exe'}")
+
+        # Save new hash state
+        STATEFILE.write_text(json.dumps({"wutil_hash": wutil_hash}, indent=2))
+    except subprocess.CalledProcessError as e:
+        print("❌ PyInstaller build failed:", e)

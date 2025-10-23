@@ -3,3 +3,5 @@ __pycache__/
 .venv/
 manifest.json
 extentions/__pycache__/
+build/wutil
+wutil.spec
