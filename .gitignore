@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 .venv/
 manifest.json
+extentions/__pycache__/
