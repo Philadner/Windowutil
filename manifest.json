@@ -1,0 +1,22 @@
+{
+  "centre": {
+    "args": 3,
+    "short": "cen",
+    "file": "centre.py"
+  },
+  "nudge": {
+    "args": 2,
+    "short": "nud",
+    "file": "nudge.py"
+  },
+  "resize": {
+    "args": 2,
+    "short": "res",
+    "file": "resize.py"
+  },
+  "select": {
+    "args": 1,
+    "short": "sel",
+    "file": "select.py"
+  }
+}

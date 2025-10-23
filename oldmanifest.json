@@ -1,0 +1,5 @@
+{
+  "select": { "args": 1, "short": "sel", "file": "select.py" },
+  "centre": { "args": 3, "short": "ctr", "file": "centre.py" },
+  "nudge":  { "args": 0, "short": "nud", "file": "nudge.py" }
+}
