@@ -5,12 +5,23 @@ import tempfile
 import shutil
 import requests
 import json
+import hashlib
 from pathlib import Path
+
+
+def md5_hash(file_path: Path) -> str:
+    """Return MD5 hash for a file."""
+    hasher = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
 
 class Extension:
     def __init__(self):
         self.name = "update"
-        self.desc = "Checks for and applies updates from api.phi.me.uk"
+        self.desc = "Checks for and applies incremental updates from api.phi.me.uk"
         self.args = []
 
     def main(self, window=None):
@@ -25,6 +36,7 @@ class Extension:
             except Exception:
                 pass
 
+        # --- Fetch release info from Cloudflare Worker ---
         try:
             resp = requests.get(f"https://api.phi.me.uk/update/windowutil?version={version}")
             data = resp.json()
@@ -41,6 +53,7 @@ class Extension:
         print(f"⬆️  Update available: {version} → {latest}")
         print("📦 Downloading package...")
 
+        # --- Download the release zip ---
         try:
             r = requests.get(zip_url, stream=True)
             r.raise_for_status()
@@ -52,23 +65,56 @@ class Extension:
             print(f"❌ Failed to download update: {e}")
             return
 
+        # --- Extract the zip ---
         tmp_extract = Path(tempfile.mkdtemp(prefix="windowutil_update_"))
-        print("📂 Extracting...")
         with zipfile.ZipFile(tmp_zip, "r") as zip_ref:
             zip_ref.extractall(tmp_extract)
 
-        # GitHub zips include a top-level folder like Philadner-Windowutil-<sha>
+        # GitHub release zips include a top-level folder like Philadner-Windowutil-<sha>
         extracted_root = next(tmp_extract.iterdir())
 
+        # --- Read remote update.json (hash map) ---
+        remote_update_file = extracted_root / "update.json"
+        if not remote_update_file.exists():
+            print("⚠️ No update.json found in release. Falling back to full update.")
+            remote_hashes = None
+        else:
+            remote_hashes = json.loads(remote_update_file.read_text())["files"]
+
+        # --- Compare with local hashes (if available) ---
+        local_hashes = {}
+        local_update_file = root_dir / "update.json"
+        if local_update_file.exists():
+            try:
+                local_hashes = json.loads(local_update_file.read_text())["files"]
+            except Exception:
+                pass
+
         print("🧰 Applying update...")
-        changed, skipped = [], []
+        changed, skipped, identical = [], [], []
 
         for src_path in extracted_root.rglob("*"):
             if src_path.is_dir():
                 continue
-
             rel_path = src_path.relative_to(extracted_root)
             dest_path = root_dir / rel_path
+
+            # skip caches and venv junk
+            if (
+                "__pycache__" in str(src_path)
+                or src_path.suffix in (".pyc", ".pyo")
+                or src_path.name.startswith(".")
+                or src_path.name.endswith(".log")
+            ):
+                continue
+
+            # if hash matches, skip file
+            if remote_hashes and rel_path.as_posix() in remote_hashes:
+                new_hash = remote_hashes[rel_path.as_posix()]
+                old_hash = local_hashes.get(rel_path.as_posix())
+                if old_hash == new_hash and dest_path.exists():
+                    identical.append(str(rel_path))
+                    continue
 
             # Skip self and core files (require manual restart)
             if dest_path.name in ("windowutil.py", "loader.py", "update.py"):
@@ -79,13 +125,23 @@ class Extension:
             shutil.copy2(src_path, dest_path)
             changed.append(str(rel_path))
 
-        # write new version
+        # update local update.json + version
+        if remote_hashes:
+            (root_dir / "update.json").write_text(json.dumps({
+                "version": latest,
+                "files": remote_hashes
+            }, indent=2))
+
         (root_dir / "version.json").write_text(json.dumps({"version": latest}, indent=2))
 
         print("\n✅ Update complete!\n")
         if changed:
             print("🔧 Updated files:")
             for f in changed:
+                print(f"  - {f}")
+        if identical:
+            print("\n📁 Skipped identical files:")
+            for f in identical:
                 print(f"  - {f}")
         if skipped:
             print("\n⚠️ Skipped core files (restart or run `windowutil update` again to finish):")
