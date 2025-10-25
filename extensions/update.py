@@ -181,7 +181,13 @@ class Extension:
                     continue
 
             # skip locked core files
-            if dest_path.name in ("windowutil.py", "loader.py", "update.py"):
+            if dest_path.name.lower() in (
+                "windowutil.py", 
+                "loader.py", 
+                "update.py", 
+                "wutil.exe", 
+                "_update_worker.py"
+                ):
                 skipped.append(str(rel_path))
                 continue
 
