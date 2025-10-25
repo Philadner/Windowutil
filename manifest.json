@@ -4,6 +4,11 @@
     "short": "cen",
     "file": "centre.py"
   },
+  "install": {
+    "args": 1,
+    "short": "ins",
+    "file": "install.py"
+  },
   "nudge": {
     "args": 2,
     "short": "nud",

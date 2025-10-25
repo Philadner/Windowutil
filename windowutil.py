@@ -49,7 +49,7 @@ def execute_chain(argv):
             # --- handle non-selection commands ---
             else:
                 # NEW: allow some commands to run without a window
-                if cmd_key in ("update", "help", "config", "build"):
+                if cmd_key in ("update", "help", "config", "build", "install"):
                     ext.main(*cmd_args)
                 else:
                     # fallback to last selected or error

@@ -1,7 +1,15 @@
 import json, importlib.util, os, sys
+from pathlib import Path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 EXT_DIR = "extensions"
 MANIFEST = "manifest.json"
+settings_path = Path("settings.json")
+auto_update = False
+
+if settings_path.exists():
+    with open(settings_path, "r", encoding="utf-8") as f:
+        settings = json.load(f)
+        auto_update = settings.get("auto-update", False)
 
 def rebuild_manifest():
     """Auto-build manifest.json by scanning all extensions."""
@@ -30,8 +38,57 @@ def rebuild_manifest():
     print(f"[windowutil] Auto-generated manifest with {len(manifest)} extensions.")
     return manifest
 
+def auto_update_manifest():
+    settings_path = Path("settings.json")
+    manifest_path = Path("manifest.json")
+    extensions_dir = Path("extensions")
+
+    # --- 1. Check if auto-update is enabled ---
+    auto_update = False
+    if settings_path.exists():
+        try:
+            with open(settings_path, "r", encoding="utf-8") as f:
+                settings = json.load(f)
+                auto_update = settings.get("auto-update", False)
+        except json.JSONDecodeError:
+            print("⚠️ settings.json invalid — ignoring auto-update.")
+            auto_update = False
+
+    if not auto_update:
+        return  # skip silently
+
+    # --- 2. Collect extension filenames ---
+    py_files = {
+        f.name
+        for f in extensions_dir.glob("*.py")
+        if f.name not in {"__innit__.py", "__pycache__"}
+    }
+
+    # --- 3. Load manifest ---
+    manifest_missing = not manifest_path.exists()
+    manifest_data = {}
+    if not manifest_missing:
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                manifest_data = json.load(f)
+        except json.JSONDecodeError:
+            print("⚠️ manifest.json invalid — will rebuild.")
+            manifest_missing = True
+
+    manifest_files = {v["file"] for v in manifest_data.values()} if manifest_data else set()
+
+    # --- 4. Detect differences ---
+    new_files = py_files - manifest_files
+    removed_files = manifest_files - py_files
+    if manifest_missing or new_files or removed_files:
+        print("🌀 Extensions changed, rebuilding manifest...")
+        rebuild_manifest()
+        print("✅ Manifest rebuilt.")
 
 def load_manifest():
+    if auto_update:
+        auto_update_manifest()
+    """Load manifest.json, rebuilding if missing or empty."""
     if not os.path.exists(MANIFEST) or os.path.getsize(MANIFEST) == 0:
         return rebuild_manifest()
     with open(MANIFEST) as f:

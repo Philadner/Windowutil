@@ -1,1 +1,1 @@
-# This file marks the 'extensions' directory as a Python package.
+print("Oh wait python needs this innit?")
