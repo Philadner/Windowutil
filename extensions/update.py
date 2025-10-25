@@ -6,6 +6,8 @@ import shutil
 import requests
 import json
 import hashlib
+import subprocess
+import time
 from pathlib import Path
 
 
@@ -18,12 +20,75 @@ def md5_hash(file_path: Path) -> str:
     return hasher.hexdigest()
 
 
+def launch_update_worker(skipped_files, extracted_root, root_dir):
+    """Spawn a background worker to finish replacing locked files."""
+    worker_path = root_dir / "_update_worker.py"
+
+    # Build argument list for the worker (list of relative file paths)
+    args_json = json.dumps(skipped_files)
+    code = f"""
+import os, time, json, shutil, sys
+from pathlib import Path
+
+root_dir = Path(r"{root_dir}")
+src_root = Path(r"{extracted_root}")
+skipped = json.loads(r'''{args_json}''')
+
+print("🕐 Waiting for WindowUtil to close...")
+time.sleep(1.0)
+
+for i in range(50):  # try for ~5s
+    try:
+        for rel in skipped:
+            src = src_root / rel
+            dest = root_dir / rel
+            if not src.exists():
+                continue
+            os.makedirs(dest.parent, exist_ok=True)
+            shutil.copy2(src, dest)
+        print("✅ Core files replaced successfully.")
+        break
+    except PermissionError:
+        time.sleep(0.1)
+else:
+    print("⚠️ Could not replace some files; still locked.")
+
+# cleanup temp directory
+try:
+    shutil.rmtree(src_root)
+except Exception:
+    pass
+
+# remove self
+try:
+    os.remove(__file__)
+except Exception:
+    pass
+
+# relaunch wutil if exists
+exe = root_dir / "dist" / "wutil.exe"
+if exe.exists():
+    try:
+        print("🚀 Relaunching WindowUtil...")
+        os.startfile(exe)
+    except Exception:
+        pass
+"""
+
+    worker_path.write_text(code, encoding="utf-8")
+    subprocess.Popen([sys.executable, str(worker_path)], creationflags=subprocess.CREATE_NO_WINDOW)
+    print("🧩 Finishing update in background...\n")
+    time.sleep(0.5)
+    sys.exit(0)
+
+
 class Extension:
     def __init__(self):
         self.name = "update"
         self.desc = "Checks for and applies incremental updates from api.phi.me.uk"
         self.args = []
         self.short = "updt"
+
     def main(self, window=None):
         if window is not None:
             print("(i) Ignoring selected window; update works globally.")
@@ -72,7 +137,6 @@ class Extension:
         with zipfile.ZipFile(tmp_zip, "r") as zip_ref:
             zip_ref.extractall(tmp_extract)
 
-        # GitHub release zips include a top-level folder like Philadner-Windowutil-<sha>
         extracted_root = next(tmp_extract.iterdir())
 
         # --- Read remote update.json (hash map) ---
@@ -101,7 +165,6 @@ class Extension:
             rel_path = src_path.relative_to(extracted_root)
             dest_path = root_dir / rel_path
 
-            # skip caches and venv junk
             if (
                 "__pycache__" in str(src_path)
                 or src_path.suffix in (".pyc", ".pyo")
@@ -110,7 +173,6 @@ class Extension:
             ):
                 continue
 
-            # if hash matches, skip file
             if remote_hashes and rel_path.as_posix() in remote_hashes:
                 new_hash = remote_hashes[rel_path.as_posix()]
                 old_hash = local_hashes.get(rel_path.as_posix())
@@ -118,7 +180,7 @@ class Extension:
                     identical.append(str(rel_path))
                     continue
 
-            # Skip self and core files (require manual restart)
+            # skip locked core files
             if dest_path.name in ("windowutil.py", "loader.py", "update.py"):
                 skipped.append(str(rel_path))
                 continue
@@ -146,9 +208,11 @@ class Extension:
             for f in identical:
                 print(f"  - {f}")
         if skipped:
-            print("\n⚠️ Skipped core files (restart or run `windowutil update` again to finish):")
+            print("\n⚠️ Skipped core files (will be replaced after WindowUtil closes):")
             for f in skipped:
                 print(f"  - {f}")
+            launch_update_worker(skipped, extracted_root, root_dir)
+            return
 
         print(f"\n✨ Now running version {latest}")
         shutil.rmtree(tmp_extract, ignore_errors=True)
