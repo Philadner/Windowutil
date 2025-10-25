@@ -1,9 +1,8 @@
 from loader import load_manifest, import_command
 from state import load_selected
-
+import os
 def execute_chain(argv):
     manifest = load_manifest()
-
     # --- split command segments by ; or , ---
     segments = []
     current = []
