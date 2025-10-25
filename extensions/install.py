@@ -8,6 +8,7 @@ class Extension:
         self.name = "install"
         self.desc = "When you drag new extensions in, run this to rebuild the manifest"
         self.args = ["auto-toggle"]
+        self.short = "inst"
 
     def main(self, auto_toggle=None):
         # --- Rebuild manifest ---

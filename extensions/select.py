@@ -6,7 +6,7 @@ class Extension:
         self.name = "select"
         self.desc = "Select a window by fuzzy title match."
         self.args = ["search_term"]
-
+        self.short = "sel"
     def main(self, search_term):
         term = search_term.lower()
         windows = pywinctl.getAllWindows()

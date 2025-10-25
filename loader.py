@@ -27,14 +27,24 @@ def rebuild_manifest():
 
         if hasattr(mod, "Extension"):
             ext = mod.Extension()
+
+            # Fallbacks for optional attributes
+            short = getattr(ext, "short", ext.name[:3])
+            desc = getattr(ext, "desc", "")
+            arg_list = getattr(ext, "args", [])
+            arg_count = len(arg_list)
+
             manifest[ext.name] = {
-                "args": len(getattr(ext, "args", [])),
-                "short": ext.name[:3],
+                "args": arg_count,
+                "arg_names": arg_list,
+                "short": short,
+                "desc": desc,
                 "file": file
             }
 
-    with open(MANIFEST, "w") as f:
+    with open(MANIFEST, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
+
     print(f"[windowutil] Auto-generated manifest with {len(manifest)} extensions.")
     return manifest
 

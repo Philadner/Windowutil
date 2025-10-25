@@ -13,6 +13,7 @@ class Extension:
         self.name = "nudge"
         self.desc = "Smooth queued nudge with diagonal support."
         self.args = ["widthnudge", "heightnudge"]
+        self.short = "nud"
 
     def main(self, window, widthnudge=None, heightnudge=None):
         try:

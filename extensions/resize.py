@@ -12,6 +12,7 @@ class Extension:
         self.name = "resize"
         self.desc = "Resize windows smoothly by side, axis, or all sides equally."
         self.args = ["side", "amount"]
+        self.short = "res"
 
     def main(self, window, side=None, amount=None):
         try:

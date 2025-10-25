@@ -12,6 +12,7 @@ class Extension:
         self.name = "centre"
         self.desc = "Center a window on the screen, with optional nudge or animation."
         self.args = ["widthnudge", "heightnudge", "animated"]
+        self.short = "cen"
 
     def main(self, window, widthnudge=0, heightnudge=0, animated=True):
         if window is None:

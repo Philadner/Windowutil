@@ -1,32 +1,67 @@
 {
   "centre": {
     "args": 3,
+    "arg_names": [
+      "widthnudge",
+      "heightnudge",
+      "animated"
+    ],
     "short": "cen",
+    "desc": "Center a window on the screen, with optional nudge or animation.",
     "file": "centre.py"
+  },
+  "help": {
+    "args": 1,
+    "arg_names": [
+      "command"
+    ],
+    "short": "?",
+    "desc": "Lists all available commands, or details for a specific command.",
+    "file": "help.py"
   },
   "install": {
     "args": 1,
-    "short": "ins",
+    "arg_names": [
+      "auto-toggle"
+    ],
+    "short": "inst",
+    "desc": "When you drag new extensions in, run this to rebuild the manifest",
     "file": "install.py"
   },
   "nudge": {
     "args": 2,
+    "arg_names": [
+      "widthnudge",
+      "heightnudge"
+    ],
     "short": "nud",
+    "desc": "Smooth queued nudge with diagonal support.",
     "file": "nudge.py"
   },
   "resize": {
     "args": 2,
+    "arg_names": [
+      "side",
+      "amount"
+    ],
     "short": "res",
+    "desc": "Resize windows smoothly by side, axis, or all sides equally.",
     "file": "resize.py"
   },
   "select": {
     "args": 1,
+    "arg_names": [
+      "search_term"
+    ],
     "short": "sel",
+    "desc": "Select a window by fuzzy title match.",
     "file": "select.py"
   },
   "update": {
     "args": 0,
-    "short": "upd",
+    "arg_names": [],
+    "short": "updt",
+    "desc": "Checks for and applies incremental updates from api.phi.me.uk",
     "file": "update.py"
   }
 }

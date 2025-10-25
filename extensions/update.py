@@ -23,7 +23,7 @@ class Extension:
         self.name = "update"
         self.desc = "Checks for and applies incremental updates from api.phi.me.uk"
         self.args = []
-
+        self.short = "updt"
     def main(self, window=None):
         if window is not None:
             print("(i) Ignoring selected window; update works globally.")
