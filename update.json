@@ -1,5 +1,5 @@
 {
-  "version": "1.02",
+  "version": "1.07",
   "files": {
     ".build_state.json": "89d1150247ed8364534788dd057a77b3",
     ".windowutil_state.json": "b2b0a012df8f78ab09d02135c09093e2",
@@ -12,7 +12,7 @@
     "manifest.json": "2640a4ada19ee15755e24d2b78d8ee09",
     "settings.json": "26b6bd73f7aad2d9ca439f0cd5e85963",
     "state.py": "f439f3990156cecd12f63197ba7e7c16",
-    "version.json": "807784d5ce400556d0b7cfc4093a3699",
+    "version.json": "71b6136eee4648168098a04088b3605f",
     "windowutil.py": "40f5e67413e8b92a590a25235171741a",
     "wutil.py": "7e405772efbf3de2db5ad9cd0f946cf4",
     "wutil.spec": "43f2e33a469cfd06f7cdf539c8d68610",
@@ -36,7 +36,7 @@
     "extensions/nudge.py": "67412399b37566c55856f7d0c48830ba",
     "extensions/resize.py": "0af5655228f7d5c24868d75173788bdc",
     "extensions/select.py": "fdeba31db046702b8f65a871482c7de8",
-    "extensions/update.py": "853612a8cec0baa113cd360808884ad7",
+    "extensions/update.py": "7e31411a7678a74c44bd17e5e4f7fd1d",
     "extensions/__innit__.py": "7eeaef0a875f4db926ca852c6e01db0d"
   }
 }
