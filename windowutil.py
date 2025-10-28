@@ -1,7 +1,15 @@
+import time
+import debugutils
+debugutils.init_timer(time.time())
+mark = debugutils.mark_time
+mark("Start windowutil.py")
+
 from loader import load_manifest, import_command
 from state import load_selected
 import os
+
 def execute_chain(argv):
+    mark("Start execute_chain")
     manifest = load_manifest()
     # --- split command segments by ; or , ---
     segments = []
@@ -68,3 +76,4 @@ def execute_chain(argv):
 if __name__ == "__main__":
     import sys
     execute_chain(sys.argv[1:])
+    mark("Done!")

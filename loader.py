@@ -1,3 +1,8 @@
+import time
+import debugutils
+mark = debugutils.mark_time
+mark("import loader.py")
+
 import json, importlib.util, os, sys
 from pathlib import Path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -12,6 +17,7 @@ if settings_path.exists():
         auto_update = settings.get("auto-update", False)
 
 def rebuild_manifest():
+    mark("rebuild manifest")
     """Auto-build manifest.json by scanning all extensions."""
     manifest = {}
     os.makedirs(EXT_DIR, exist_ok=True)
@@ -46,9 +52,12 @@ def rebuild_manifest():
         json.dump(manifest, f, indent=2)
 
     print(f"[windowutil] Auto-generated manifest with {len(manifest)} extensions.")
+    mark("manifest rebuilt")
     return manifest
+    
 
 def auto_update_manifest():
+    mark("start check if auto update needed")
     settings_path = Path("settings.json")
     manifest_path = Path("manifest.json")
     extensions_dir = Path("extensions")
@@ -94,8 +103,10 @@ def auto_update_manifest():
         print("🌀 Extensions changed, rebuilding manifest...")
         rebuild_manifest()
         print("✅ Manifest rebuilt.")
+    mark("end check if auto update needed")
 
 def load_manifest():
+    mark("load manifest")
     if auto_update:
         auto_update_manifest()
     """Load manifest.json, rebuilding if missing or empty."""
@@ -103,10 +114,13 @@ def load_manifest():
         return rebuild_manifest()
     with open(MANIFEST) as f:
         return json.load(f)
+    mark("end load manifest")
     
 
 def import_command(entry):
+    mark(f"import command {entry}")
     """Dynamically import a command's file and return its class instance."""
     module_name = f"{EXT_DIR}.{entry['file'][:-3]}"
     mod = importlib.import_module(module_name)
+    mark(f"done importing {entry}")
     return getattr(mod, "Extension")()

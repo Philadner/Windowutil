@@ -57,6 +57,13 @@
     "desc": "Select a window by fuzzy title match.",
     "file": "select.py"
   },
+  "terminate": {
+    "args": 0,
+    "arg_names": [],
+    "short": "term",
+    "desc": "Terminate (kill) the currently selected window's process.",
+    "file": "term.py"
+  },
   "update": {
     "args": 0,
     "arg_names": [],

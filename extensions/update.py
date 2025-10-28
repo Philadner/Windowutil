@@ -1,3 +1,7 @@
+import time
+import debugutils
+mark = debugutils.mark_time
+mark("import loader.py")
 import os
 import sys
 import zipfile
@@ -90,6 +94,7 @@ class Extension:
         self.short = "updt"
 
     def main(self, window=None):
+        mark("start update extension")
         if window is not None:
             print("(i) Ignoring selected window; update works globally.")
         print("🔎 Checking for WindowUtil updates...")
@@ -104,22 +109,24 @@ class Extension:
                 pass
 
         # --- Fetch release info from Cloudflare Worker ---
+        mark("start update fetch")
         try:
             resp = requests.get(f"https://api.phi.me.uk/update/windowutil?version={version}")
             data = resp.json()
+            message = data.get("message")
         except Exception as e:
             print(f"❌ Failed to contact update server: {e}")
             return
-
+        
         if data.get("upToDate"):
-            print(f"✅ WindowUtil is up to date ({data.get('latestVersion')}).")
+            print(message)
             return
-
+        
         latest = data.get("latestVersion", "?")
         zip_url = data.get("download")
-        print(f"⬆️  Update available: {version} → {latest}")
+        print(message)
         print("📦 Downloading package...")
-
+        mark("end update fetch")
         # --- Download the release zip ---
         try:
             r = requests.get(zip_url, stream=True)

@@ -11,7 +11,7 @@ def main():
         # exe is inside wutil/, so go up one folder
         exe_dir = Path(sys.executable).resolve().parent
         root = exe_dir.parent
-        python_exe = ".venv/scripts/python.exe"
+        python_exe = str(root / ".venv" / "Scripts" / "python.exe")
     else:
         root = Path(__file__).resolve().parent
         python_exe = sys.executable
