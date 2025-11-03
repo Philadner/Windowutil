@@ -5,6 +5,7 @@ import pywinctl
 import time
 import config
 from animations import animate_to
+from wutilerror import check_types
 
 
 class Extension:
@@ -15,6 +16,11 @@ class Extension:
         self.short = "cen"
 
     def main(self, window, widthnudge=0, heightnudge=0, animated=True):
+        check_types(
+            widthnudge=(widthnudge, int),
+            heightnudge=(heightnudge, int),
+            animated=(animated, bool),
+        )
         if window is None:
             title = input("Window title: ")
             matches = [w for w in pywinctl.getAllWindows() if title.lower() in w.title.lower()]

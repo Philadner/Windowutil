@@ -6,7 +6,7 @@ import time
 import threading
 import math
 import config
-
+from wutilerror import check_types
 
 class Extension:
     def __init__(self):
@@ -16,6 +16,10 @@ class Extension:
         self.short = "nud"
 
     def main(self, window, widthnudge=None, heightnudge=None):
+        check_types(
+            widthnudge=(widthnudge, int),
+            heightnudge=(heightnudge, int),
+        )
         try:
             if window is None:
                 title = input("Window title: ")

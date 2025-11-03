@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from colorama import Fore, Back, Style, init
-
+from wutilerror import check_types
 init(autoreset=True)
 
 class Extension:
@@ -13,7 +13,7 @@ class Extension:
 
     def main(self, command=None):
         manifest_path = Path("manifest.json")
-
+        check_types(command=(command, str))
         if not manifest_path.exists():
             print(Fore.RED + "❌ Manifest not found. Try running 'wutil install' first.")
             return

@@ -5,7 +5,7 @@ import time
 import threading
 import config
 from animations import animate_to
-
+from wutilerror import check_types
 
 class Extension:
     def __init__(self):
@@ -15,6 +15,10 @@ class Extension:
         self.short = "res"
 
     def main(self, window, side=None, amount=None):
+        check_types(
+            side=(side, str),
+            amount=(amount, int),
+        )
         try:
             if window is None:
                 title = input("Window title: ")
