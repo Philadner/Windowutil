@@ -16,8 +16,7 @@ class Extension:
 
     def main(self, window, side=None, amount=None):
         check_types(
-            side=(side, str),
-            amount=(amount, int),
+            side=(side, str)
         )
         try:
             if window is None:

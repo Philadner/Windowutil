@@ -16,10 +16,11 @@ class Extension:
         self.short = "nud"
 
     def main(self, window, widthnudge=None, heightnudge=None):
-        check_types(
-            widthnudge=(widthnudge, int),
-            heightnudge=(heightnudge, int),
-        )
+        if widthnudge is not None or heightnudge is not None:
+            check_types(
+                widthnudge=(widthnudge, int),
+                heightnudge=(heightnudge, int),
+            )
         try:
             if window is None:
                 title = input("Window title: ")

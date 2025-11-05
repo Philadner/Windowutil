@@ -70,5 +70,14 @@
     "short": "updt",
     "desc": "Checks for and applies incremental updates from api.phi.me.uk",
     "file": "update.py"
+  },
+  "dev-build": {
+    "args": 1,
+    "arg_names": [
+      "dummy"
+    ],
+    "short": "build",
+    "desc": "Write hashes and exes for production build.",
+    "file": "_dev-build.py"
   }
 }
