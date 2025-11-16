@@ -1,21 +1,33 @@
-import colorama
-from colorama import Fore, Style, Back
-colorama.init(autoreset=True)
-import time
 import debugutils
-import traceback
+import time
 debugutils.init_timer(time.time())
 mark = debugutils.mark_time
 mark("Start windowutil.py")
 
+mark ("imports")
+#mark ("colorama")
+import colorama
+from colorama import Fore, Style, Back
+#mark ("traceback")
+import traceback
+#mark ("sys")
+import sys
+#mark ("loader")
 from loader import load_manifest, import_command
+#mark ("state")
 from state import load_selected
+#mark ("os")
 import os
+
+colorama.init(autoreset=True)
+mark ("imports done and colorama initialized")
+
 #recursion guard
+mark ("recursion guard check")
 if os.environ.get("WUTIL_RUNNING") == "1":
     raise SystemExit("Already running")
 os.environ["WUTIL_RUNNING"] = "1"
- 
+mark ("Process function definitions")
 def print_error(title: str, message: str, exc: Exception | None = None, providedentry: dict | None = None):
     """Pretty WUTIL error output with argument info"""
     width = 70
@@ -115,7 +127,7 @@ def execute_chain(argv):
             if cmd_key == "select":
                 window = ext.main(*convert_args(entry, cmd_args))
             else:
-                if cmd_key in ("update", "help", "config", "build", "install"):
+                if cmd_key in ("update", "help", "config", "dev-build", "install"):
                     try:
                         ext.main(*convert_args(entry, cmd_args))
                     except Exception as e:
@@ -138,10 +150,10 @@ def execute_chain(argv):
 
             # ✅ advance to next command
             i += 1 + (args_needed or 0)
-                    
+
+mark("Finished processing functions")    
 
 
 if __name__ == "__main__":
-    import sys
     execute_chain(sys.argv[1:])
     mark("Done!")

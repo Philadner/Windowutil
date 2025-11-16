@@ -72,10 +72,8 @@
     "file": "update.py"
   },
   "dev-build": {
-    "args": 1,
-    "arg_names": [
-      "dummy"
-    ],
+    "args": 0,
+    "arg_names": [],
     "short": "build",
     "desc": "Write hashes and exes for production build.",
     "file": "_dev-build.py"

@@ -13,7 +13,7 @@ class Extension:
 
     def main(self, command=None):
         manifest_path = Path("manifest.json")
-        check_types(command=(command, str))
+        check_types(command=(command, str, True))
         if not manifest_path.exists():
             print(Fore.RED + "❌ Manifest not found. Try running 'wutil install' first.")
             return

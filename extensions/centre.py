@@ -17,9 +17,9 @@ class Extension:
 
     def main(self, window, widthnudge=0, heightnudge=0, animated=True):
         check_types(
-            widthnudge=(widthnudge, int),
-            heightnudge=(heightnudge, int),
-            animated=(animated, bool),
+            widthnudge=(widthnudge, int, True),
+            heightnudge=(heightnudge, int, True),
+            animated=(animated, bool, True),
         )
         if window is None:
             title = input("Window title: ")
