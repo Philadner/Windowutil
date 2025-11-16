@@ -62,12 +62,26 @@ def print_error(title: str, message: str, exc: Exception | None = None, provided
         print(Fore.WHITE + tb.strip())
         print()
 
+import shlex
+
 def convert_args(entry, cmd_args):
+    # If cmd_args is already a list, join it
+    if isinstance(cmd_args, list):
+        cmd_args = " ".join(cmd_args)
+
+    # NOW it's safe to split
+    args = shlex.split(cmd_args, posix=False)
+
     expected_arg_count = (
-    len(entry["arg_names"]) if "arg_names" in entry else entry.get("args", 0)
+        len(entry.get("arg_names", [])) 
+        if "arg_names" in entry 
+        else entry.get("args", 0)
     )
-    converted_args = [auto_cast(a) for a in cmd_args][:expected_arg_count]
+
+    converted_args = [auto_cast(a) for a in args][:expected_arg_count]
+
     return converted_args
+
 
 def auto_cast(value: str):
     """Convert CLI strings to basic Python types."""
@@ -127,7 +141,7 @@ def execute_chain(argv):
             if cmd_key == "select":
                 window = ext.main(*convert_args(entry, cmd_args))
             else:
-                if cmd_key in ("update", "help", "config", "dev-build", "install"):
+                if cmd_key in ("update", "help", "config", "dev-build", "install", "path", "run"):
                     try:
                         ext.main(*convert_args(entry, cmd_args))
                     except Exception as e:

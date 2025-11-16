@@ -2,10 +2,12 @@
 import subprocess
 import sys
 from pathlib import Path
+import os
 
 # --- this constant will be replaced at build time ---
 INSTALL_PATH = "{{INSTALL_PATH}}"  
-
+WUTIL_REAL_CWD = os.getcwd()
+os.environ["WUTIL_REAL_CWD"] = WUTIL_REAL_CWD
 def main():
     if getattr(sys, 'frozen', False):
         # exe is inside wutil/, so go up one folder

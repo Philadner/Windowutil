@@ -10,6 +10,15 @@
     "desc": "Center a window on the screen, with optional nudge or animation.",
     "file": "centre.py"
   },
+  "example": {
+    "args": 1,
+    "arg_names": [
+      "text"
+    ],
+    "short": "eg",
+    "desc": "An example extention to help show code structure.",
+    "file": "example.py"
+  },
   "help": {
     "args": 1,
     "arg_names": [
@@ -38,6 +47,17 @@
     "desc": "Smooth queued nudge with diagonal support.",
     "file": "nudge.py"
   },
+  "path": {
+    "args": 3,
+    "arg_names": [
+      "action",
+      "arg1",
+      "arg2"
+    ],
+    "short": "p",
+    "desc": "Manage WUtil executable aliases.",
+    "file": "path.py"
+  },
   "resize": {
     "args": 2,
     "arg_names": [
@@ -47,6 +67,16 @@
     "short": "res",
     "desc": "Resize windows smoothly by side, axis, or all sides equally.",
     "file": "resize.py"
+  },
+  "run": {
+    "args": 2,
+    "arg_names": [
+      "alias",
+      "args"
+    ],
+    "short": "r",
+    "desc": "Run an alias created with wutil path.",
+    "file": "run.py"
   },
   "select": {
     "args": 1,
