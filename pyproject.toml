@@ -6,7 +6,6 @@ authors = [
     {name = "Philadner"}
 ]
 license = {text = "GPLv3"}
-readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
     "pyautogui (>=0.9.54,<0.10.0)",

@@ -6,3 +6,4 @@ extentions/__pycache__/
 build/wutil
 wutil.spec
 *_dev-*
+Installertest/
