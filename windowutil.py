@@ -141,7 +141,7 @@ def execute_chain(argv):
             if cmd_key == "select":
                 window = ext.main(*convert_args(entry, cmd_args))
             else:
-                if cmd_key in ("update", "help", "config", "dev-build", "install", "path", "run"):
+                if cmd_key in ("update", "help", "config", "dev-build", "install", "path", "run", "mathenv", "keyboardutil", "note"):
                     try:
                         ext.main(*convert_args(entry, cmd_args))
                     except Exception as e:

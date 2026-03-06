@@ -2,6 +2,7 @@ from wutilerror import check_types
 import os
 import json
 import subprocess
+import sys
 
 CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".wutil")
 PATH_FILE = os.path.join(CONFIG_DIR, "paths.json")
@@ -44,9 +45,15 @@ class Extension:
 
         arg_list = args.split(" ") if args else []
 
+        # Allow stored paths to be Python scripts as well as native executables
+        if exe.lower().endswith(".py"):
+            cmd = [sys.executable, exe] + arg_list
+        else:
+            cmd = [exe] + arg_list
+
         try:
             subprocess.run(
-                [exe] + arg_list,
+                cmd,
                 cwd=exe_dir,   # <-- force real working directory
             )
         except Exception as e:

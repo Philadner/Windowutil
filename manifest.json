@@ -19,6 +19,13 @@
     "desc": "An example extention to help show code structure.",
     "file": "example.py"
   },
+  "failure": {
+    "args": 0,
+    "arg_names": [],
+    "short": "fail",
+    "desc": "An extension that always fails.",
+    "file": "failure.py"
+  },
   "help": {
     "args": 1,
     "arg_names": [
@@ -36,6 +43,33 @@
     "short": "inst",
     "desc": "When you drag new extensions in, run this to rebuild the manifest",
     "file": "install.py"
+  },
+  "keyboardutil": {
+    "args": 1,
+    "arg_names": [
+      "tool"
+    ],
+    "short": "kbu",
+    "desc": "Utility functions for keyboard input handling.",
+    "file": "keyboardutil.py"
+  },
+  "mathenv": {
+    "args": 0,
+    "arg_names": [],
+    "short": "mth",
+    "desc": "Live maths environment with helpers.",
+    "file": "mathenv.py"
+  },
+  "note": {
+    "args": 3,
+    "arg_names": [
+      "action",
+      "arg1",
+      "arg2"
+    ],
+    "short": "nt",
+    "desc": "Create and manage simple linked notes.",
+    "file": "note.py"
   },
   "nudge": {
     "args": 2,
