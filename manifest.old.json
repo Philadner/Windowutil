@@ -9,11 +9,7 @@
     "short": "cen",
     "desc": "Center a window on the screen, with optional nudge or animation.",
     "requires_window": true,
-    "file": "centre.py",
-    "deps": [
-      "pyautogui",
-      "pywinctl"
-    ]
+    "file": "centre.py"
   },
   "example": {
     "args": 1,
@@ -61,10 +57,7 @@
     "short": "kbu",
     "desc": "Utility functions for keyboard input handling.",
     "requires_window": false,
-    "file": "keyboardutil.py",
-    "deps": [
-      "keyboard"
-    ]
+    "file": "keyboardutil.py"
   },
   "mathenv": {
     "args": 0,
@@ -95,12 +88,7 @@
     "short": "nud",
     "desc": "Smooth queued nudge with diagonal support.",
     "requires_window": true,
-    "file": "nudge.py",
-    "deps": [
-      "keyboard",
-      "pywinctl",
-      "pywintypes"
-    ]
+    "file": "nudge.py"
   },
   "path": {
     "args": 3,
@@ -123,12 +111,7 @@
     "short": "res",
     "desc": "Resize windows smoothly by side, axis, or all sides equally.",
     "requires_window": true,
-    "file": "resize.py",
-    "deps": [
-      "keyboard",
-      "pywinctl",
-      "pywintypes"
-    ]
+    "file": "resize.py"
   },
   "run": {
     "args": 2,
@@ -149,10 +132,7 @@
     "short": "sel",
     "desc": "Select a window by fuzzy title match.",
     "requires_window": false,
-    "file": "select.py",
-    "deps": [
-      "pywinctl"
-    ]
+    "file": "select.py"
   },
   "terminate": {
     "args": 0,
@@ -160,10 +140,7 @@
     "short": "term",
     "desc": "Terminate (kill) the currently selected window's process.",
     "requires_window": true,
-    "file": "term.py",
-    "deps": [
-      "psutil"
-    ]
+    "file": "term.py"
   },
   "text": {
     "args": 1,
@@ -181,10 +158,7 @@
     "short": "updt",
     "desc": "Checks for and applies incremental updates from api.phi.me.uk",
     "requires_window": false,
-    "file": "update.py",
-    "deps": [
-      "requests"
-    ]
+    "file": "update.py"
   },
   "dev-build": {
     "args": 0,
