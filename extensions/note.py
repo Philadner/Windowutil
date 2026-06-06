@@ -5,7 +5,11 @@ import hashlib
 import uuid
 from datetime import datetime
 from colorama import Fore, Style, init as colorama_init
+import debugutils
 from wutilerror import check_types
+
+mark = debugutils.mark_time
+log = debugutils.log
 
 
 def _base_dir():
@@ -37,19 +41,23 @@ def _load_index():
     _ensure_dirs()
     path = _index_path()
     if not os.path.exists(path):
+        log("note index missing; starting empty", important=False, source="note")
         return {"notes": {}}
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
         if isinstance(data, dict) and "notes" in data and isinstance(data["notes"], dict):
+            log(f"loaded note index with {len(data['notes'])} notes", important=False, source="note")
             return data
     except Exception:
+        log("failed to load note index; falling back to empty", source="note")
         pass
     return {"notes": {}}
 
 
 def _save_index(index):
     _ensure_dirs()
+    log(f"saving note index with {len(index['notes'])} notes", important=False, source="note")
     with open(_index_path(), "w", encoding="utf-8") as f:
         json.dump(index, f, indent=2)
 
@@ -185,8 +193,11 @@ class Extension:
         self.desc = "Create and manage simple linked notes."
         self.args = ["action", "arg1", "arg2"]
         self.short = "nt"
+        self.requires_window = False
 
     def main(self, action=None, arg1=None, arg2=None):
+        mark("note start", source="note")
+        log(f"note action={action} arg1={arg1} arg2={arg2}", important=False, source="note")
         check_types(
             action=(action, str, False),
             arg1=(arg1, str, True),
@@ -196,6 +207,7 @@ class Extension:
         _migrate_legacy_if_present()
 
         if not action:
+            log("note invoked without action; showing usage", source="note")
             return self._usage()
 
         action = action.lower()
@@ -263,6 +275,7 @@ class Extension:
 
     def _add(self, note_id, text):
         if not note_id or _needs_interactive_text(text):
+            log("note add entering interactive flow", important=False, source="note")
             return self._add_ui(note_id)
         note_id = _strip_outer_quotes(note_id).strip()
         text = _strip_outer_quotes(text)
@@ -270,6 +283,7 @@ class Extension:
         index = _load_index()
         if note_id in index["notes"]:
             print(f"Note '{note_id}' already exists.")
+            log(f"note add rejected duplicate id={note_id}", source="note")
             return
 
         note = {
@@ -281,6 +295,7 @@ class Extension:
         }
         self._save_note(note_id, note, index)
         print(f"Added note '{note_id}'.")
+        log(f"note added id={note_id}", source="note")
 
     def _add_ui(self, note_id=None):
         _init_ui()
@@ -320,12 +335,14 @@ class Extension:
         id2 = _strip_outer_quotes(id2).strip()
         if id1 == id2:
             print("Cannot link a note to itself.")
+            log("note link rejected self-link", source="note")
             return
 
         note1, index = self._load_note(id1)
         note2, index = self._load_note(id2)
         if not note1 or not note2:
             print("Both notes must exist to link them.")
+            log(f"note link failed id1={id1} id2={id2}", source="note")
             return
 
         for note, other_id in ((note1, id2), (note2, id1)):
@@ -336,6 +353,7 @@ class Extension:
         self._save_note(id1, note1, index)
         self._save_note(id2, note2, index)
         print(f"Linked '{id1}' <-> '{id2}'.")
+        log(f"linked notes {id1} and {id2}", source="note")
 
     def _link_ui(self):
         _init_ui()
@@ -394,6 +412,7 @@ class Extension:
         entry = index["notes"].get(note_id)
         if not entry:
             print(f"Note '{note_id}' does not exist.")
+            log(f"delete failed missing note={note_id}", source="note")
             return
 
         filename = entry.get("file")
@@ -415,6 +434,7 @@ class Extension:
                 _save_note_file(index["notes"][other_id]["file"], note)
 
         print(f"Deleted note '{note_id}'.")
+        log(f"deleted note id={note_id}", source="note")
 
     def _delete_ui(self):
         _init_ui()
@@ -430,6 +450,7 @@ class Extension:
         index = _load_index()
         if not index["notes"]:
             print("No notes stored.")
+            log("note list found no notes", source="note")
             return
 
         for note_id in sorted(index["notes"].keys()):
@@ -439,6 +460,7 @@ class Extension:
             labels = note.get("labels", [])
             label_text = f" [{', '.join(labels)}]" if labels else ""
             print(f"{note_id}: {_preview(note.get('text', ''), 60)}{label_text}")
+        log(f"listed {len(index['notes'])} notes", source="note")
 
     def _inspect(self, note_id):
         if not note_id:
@@ -467,6 +489,7 @@ class Extension:
 
     def _search(self, query):
         if _needs_interactive_text(query):
+            log("note search entering interactive flow", important=False, source="note")
             return self._search_ui()
         query = _strip_outer_quotes(query)
 
@@ -484,6 +507,7 @@ class Extension:
 
         if not matches:
             print("No matches found.")
+            log(f"note search found no matches for query={query}", source="note")
             return
 
         for note_id in sorted(matches):
@@ -491,6 +515,7 @@ class Extension:
             if not note:
                 continue
             print(f"{note_id}: {_preview(note.get('text', ''), 60)}")
+        log(f"note search found {len(matches)} matches for query={query}", source="note")
 
     def _search_ui(self):
         _init_ui()
@@ -523,21 +548,25 @@ class Extension:
         label = label.strip()
         if not label:
             print("Label cannot be empty.")
+            log("note label rejected empty label", source="note")
             return
 
         note, index = self._load_note(note_id)
         if not note:
             print(f"Note '{note_id}' not found.")
+            log(f"note label failed missing note={note_id}", source="note")
             return
 
         labels = note.setdefault("labels", [])
         if label.lower() in (l.lower() for l in labels):
             print(f"Label '{label}' already exists on '{note_id}'.")
+            log(f"note label already present note={note_id} label={label}", source="note")
             return
 
         labels.append(label)
         self._save_note(note_id, note, index)
         print(f"Added label '{label}' to '{note_id}'.")
+        log(f"added label note={note_id} label={label}", source="note")
 
     def _label_ui(self):
         _init_ui()

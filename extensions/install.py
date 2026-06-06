@@ -1,7 +1,10 @@
 import os
 import json
 import pathlib
+import debugutils
 from loader import rebuild_manifest
+mark = debugutils.mark_time
+log = debugutils.log
 
 class Extension:
     def __init__(self):
@@ -9,14 +12,19 @@ class Extension:
         self.desc = "When you drag new extensions in, run this to rebuild the manifest"
         self.args = ["auto-toggle"]
         self.short = "inst"
+        self.requires_window = False
 
     def main(self, auto_toggle=None):
+        mark("install start", source="install")
+        log(f"install invoked auto_toggle={auto_toggle}", important=False, source="install")
         # --- Rebuild manifest ---
         manifest = pathlib.Path("manifest.json")
         if manifest.exists():
+            log("removing existing manifest before rebuild", important=False, source="install")
             os.remove(manifest)
         rebuild_manifest()
         print("✅ Manifest rebuilt.")
+        log("manifest rebuild complete", source="install")
 
         # --- Handle settings toggle or explicit on/off ---
         if auto_toggle is not None:
@@ -29,6 +37,7 @@ class Extension:
                         settings = json.load(f)
                 except json.JSONDecodeError:
                     print("⚠️ settings.json was corrupt — recreating.")
+                    log("settings.json was corrupt during install toggle", source="install")
                     settings = {}
             else:
                 settings = {}
@@ -54,3 +63,4 @@ class Extension:
 
             state_str = "enabled" if new_state else "disabled"
             print(f"🔁 Auto-update has been {state_str}.")
+            log(f"auto-update set to {new_state}", source="install")

@@ -1,8 +1,12 @@
 from wutilerror import check_types
+import debugutils
 import code
 import math
 from fractions import Fraction
 import textwrap
+
+mark = debugutils.mark_time
+log = debugutils.log
 
 class Extension:
     def __init__(self):
@@ -10,8 +14,11 @@ class Extension:
         self.desc = "Live maths environment with helpers."
         self.args = []
         self.short = "mth"
+        self.requires_window = False
 
     def main(self):
+        mark("mathenv start", source="mathenv")
+        log("initialising interactive math environment", source="mathenv")
         # ---------------------
         # Built-in maths helpers
         # ---------------------
@@ -122,6 +129,7 @@ class Extension:
             # help panel
             "mathhelp": mathhelp,
         }
+        log(f"math environment prepared with {len(env)} symbols", important=False, source="mathenv")
 
         banner = """
 ========================================
