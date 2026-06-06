@@ -1,10 +1,16 @@
-import keyboard
 import time
 from colorama import Fore, Style, init as colorama_init
+import debugutils
+from wutildeps import deps
+
+mark = debugutils.mark_time
+log = debugutils.log
 
 
 class Tools:
     def subscript_maker():
+        mark("subscript maker start", source="keyboardutil")
+        keyboard = deps.keyboard
         colorama_init(autoreset=True)
         subs = {'0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉'}
         state = {
@@ -95,11 +101,13 @@ class Tools:
         # Pause toggle stays active even when handlers are detached.
         keyboard.on_press_key('#', on_toggle_pause, suppress=True)
         attach_handlers()
+        log("subscript maker handlers attached", source="keyboardutil")
 
         print("Subscript maker active. Press ESC to stop.")
         render_status()
         keyboard.wait('esc')
         print()
+        log("subscript maker ended", source="keyboardutil")
 
 
 class Extension:
@@ -108,9 +116,13 @@ class Extension:
         self.desc = "Utility functions for keyboard input handling."
         self.args = ["tool"]
         self.short = "kbu"
+        self.requires_window = False
+        self.deps = ["keyboard"]
 
     def main(self, tool):
+        mark("keyboardutil start", source="keyboardutil")
         print(f"Keyboard utility tool: {tool}")
+        log(f"keyboard utility requested tool={tool}", source="keyboardutil")
         # Tool: SubscriptMaker
         if tool.lower() in ("subscript", "subscriptmaker", "subscrpt", "sub"):
             Tools.subscript_maker()

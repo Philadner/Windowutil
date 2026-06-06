@@ -7,12 +7,13 @@ import sys
 import zipfile
 import tempfile
 import shutil
-import requests
 import json
 import hashlib
 import subprocess
 import time
 from pathlib import Path
+from wutildeps import deps
+log = debugutils.log
 
 
 def md5_hash(file_path: Path) -> str:
@@ -92,11 +93,13 @@ class Extension:
         self.desc = "Checks for and applies incremental updates from api.phi.me.uk"
         self.args = []
         self.short = "updt"
+        self.requires_window = False
+        self.deps = ["requests"]
 
-    def main(self, window=None):
-        mark("start update extension")
-        if window is not None:
-            print("(i) Ignoring selected window; update works globally.")
+    def main(self):
+        mark("start update extension", source="update")
+        requests = deps.requests
+        log("checking for updates", source="update")
         print("🔎 Checking for WindowUtil updates...")
 
         root_dir = Path(__file__).resolve().parent.parent
@@ -109,13 +112,14 @@ class Extension:
                 pass
 
         # --- Fetch release info from Cloudflare Worker ---
-        mark("start update fetch")
+        mark("start update fetch", important=False, source="update")
         try:
             resp = requests.get(f"https://api.phi.me.uk/update/windowutil?version={version}")
             data = resp.json()
             message = data.get("message")
         except Exception as e:
             print(f"❌ Failed to contact update server: {e}")
+            log(f"update server request failed: {e}", source="update")
             return
         
         if data.get("upToDate"):
@@ -124,9 +128,10 @@ class Extension:
         
         latest = data.get("latestVersion", "?")
         zip_url = data.get("download")
+        log(f"update available current={version} latest={latest}", source="update")
         print(message)
         print("📦 Downloading package...")
-        mark("end update fetch")
+        mark("end update fetch", important=False, source="update")
         # --- Download the release zip ---
         try:
             r = requests.get(zip_url, stream=True)
@@ -137,6 +142,7 @@ class Extension:
                     f.write(chunk)
         except Exception as e:
             print(f"❌ Failed to download update: {e}")
+            log(f"update download failed: {e}", source="update")
             return
 
         # --- Extract the zip ---
@@ -150,6 +156,7 @@ class Extension:
         remote_update_file = extracted_root / "update.json"
         if not remote_update_file.exists():
             print("⚠️ No update.json found in release. Falling back to full update.")
+            log("downloaded update had no update.json", source="update")
             remote_hashes = None
         else:
             remote_hashes = json.loads(remote_update_file.read_text())["files"]
@@ -164,6 +171,7 @@ class Extension:
                 pass
 
         print("🧰 Applying update...")
+        log("starting incremental file apply", source="update")
         changed, skipped, identical = [], [], []
 
         for src_path in extracted_root.rglob("*"):
@@ -212,6 +220,7 @@ class Extension:
         (root_dir / "version.json").write_text(json.dumps({"version": latest}, indent=2))
 
         print("\n✅ Update complete!\n")
+        log(f"update finished changed={len(changed)} identical={len(identical)} skipped={len(skipped)}", source="update")
         if changed:
             print("🔧 Updated files:")
             for f in changed:
@@ -229,4 +238,3 @@ class Extension:
 
         print(f"\n✨ Now running version {latest}")
         shutil.rmtree(tmp_extract, ignore_errors=True)
-        return window
