@@ -1,5 +1,5 @@
 {
-  "version": "1.11.4",
+  "version": "1.11.5",
   "files": {
     ".build_state.json": "40c33a5bec3399d7f1e7b2ee3b808625",
     ".windowutil_state.json": "516cfceea8d321147ea21f0bfc73d040",
@@ -17,7 +17,7 @@
     "settings.json": "26b6bd73f7aad2d9ca439f0cd5e85963",
     "state.py": "f1193a184aba28f7bf52f54c2b345288",
     "uv.lock": "9de803d9424062649880902cc588b0eb",
-    "version.json": "995ea5433fea6b259beed746f18b45c4",
+    "version.json": "cfeaab8248b4268d965b7aaef4a08594",
     "windowutil.py": "c3a04c13eccd4e4a141f11ea46b036ee",
     "wutil.py": "e20e2cb3165a4cb5e45e836e2f4f322f",
     "wutil.spec": "bf6744b35c4d0e1fd572d4d32753b68d",
