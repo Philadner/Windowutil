@@ -156,7 +156,7 @@
     "args": 0,
     "arg_names": [],
     "short": "updt",
-    "desc": "Checks for and applies incremental updates from api.phi.me.uk",
+    "desc": "Checks for and applies incremental updates from hub.phi.me.uk",
     "requires_window": false,
     "file": "update.py"
   },

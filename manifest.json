@@ -9,11 +9,18 @@
     "short": "cen",
     "desc": "Center a window on the screen, with optional nudge or animation.",
     "requires_window": true,
-    "file": "centre.py",
-    "deps": [
-      "pyautogui",
-      "pywinctl"
-    ]
+    "file": "centre.go",
+    "exe": ".wutil/goext/centre.exe",
+    "runtime": "go"
+  },
+  "dev-build": {
+    "args": 0,
+    "arg_names": [],
+    "short": "build",
+    "desc": "Write hashes and exes for production build.",
+    "requires_window": false,
+    "file": "_dev-build.py",
+    "runtime": "python"
   },
   "example": {
     "args": 1,
@@ -23,7 +30,8 @@
     "short": "eg",
     "desc": "An example extention to help show code structure.",
     "requires_window": true,
-    "file": "example.py"
+    "file": "example.py",
+    "runtime": "python"
   },
   "failure": {
     "args": 0,
@@ -31,17 +39,32 @@
     "short": "fail",
     "desc": "An extension that always fails.",
     "requires_window": true,
-    "file": "failure.py"
+    "file": "failure.py",
+    "runtime": "python"
   },
-  "help": {
+  "gofail": {
     "args": 1,
     "arg_names": [
-      "command"
+      "reason"
+    ],
+    "short": "gof",
+    "desc": "A Go extension that always fails.",
+    "requires_window": false,
+    "file": "gofail.go",
+    "exe": ".wutil/goext/gofail.exe",
+    "runtime": "go"
+  },
+  "help": {
+    "args": 2,
+    "arg_names": [
+      "command",
+      "-lang"
     ],
     "short": "?",
     "desc": "Lists all available commands, or details for a specific command.",
     "requires_window": false,
-    "file": "help.py"
+    "runtime": "go",
+    "handler": "help"
   },
   "install": {
     "args": 1,
@@ -49,9 +72,10 @@
       "auto-toggle"
     ],
     "short": "inst",
-    "desc": "When you drag new extensions in, run this to rebuild the manifest",
+    "desc": "Rebuild the mixed Go/Python manifest and optionally toggle auto-update.",
     "requires_window": false,
-    "file": "install.py"
+    "runtime": "go",
+    "handler": "install"
   },
   "keyboardutil": {
     "args": 1,
@@ -64,7 +88,8 @@
     "file": "keyboardutil.py",
     "deps": [
       "keyboard"
-    ]
+    ],
+    "runtime": "python"
   },
   "mathenv": {
     "args": 0,
@@ -72,7 +97,8 @@
     "short": "mth",
     "desc": "Live maths environment with helpers.",
     "requires_window": false,
-    "file": "mathenv.py"
+    "file": "mathenv.py",
+    "runtime": "python"
   },
   "note": {
     "args": 3,
@@ -84,7 +110,8 @@
     "short": "nt",
     "desc": "Create and manage simple linked notes.",
     "requires_window": false,
-    "file": "note.py"
+    "file": "note.py",
+    "runtime": "python"
   },
   "nudge": {
     "args": 2,
@@ -95,12 +122,9 @@
     "short": "nud",
     "desc": "Smooth queued nudge with diagonal support.",
     "requires_window": true,
-    "file": "nudge.py",
-    "deps": [
-      "keyboard",
-      "pywinctl",
-      "pywintypes"
-    ]
+    "file": "nudge.go",
+    "exe": ".wutil/goext/nudge.exe",
+    "runtime": "go"
   },
   "path": {
     "args": 3,
@@ -112,7 +136,9 @@
     "short": "p",
     "desc": "Manage WUtil executable aliases.",
     "requires_window": false,
-    "file": "path.py"
+    "file": "path.go",
+    "exe": ".wutil/goext/path.exe",
+    "runtime": "go"
   },
   "resize": {
     "args": 2,
@@ -123,12 +149,9 @@
     "short": "res",
     "desc": "Resize windows smoothly by side, axis, or all sides equally.",
     "requires_window": true,
-    "file": "resize.py",
-    "deps": [
-      "keyboard",
-      "pywinctl",
-      "pywintypes"
-    ]
+    "file": "resize.go",
+    "exe": ".wutil/goext/resize.exe",
+    "runtime": "go"
   },
   "run": {
     "args": 2,
@@ -139,7 +162,9 @@
     "short": "r",
     "desc": "Run an alias created with wutil path.",
     "requires_window": false,
-    "file": "run.py"
+    "file": "run.go",
+    "exe": ".wutil/goext/run.exe",
+    "runtime": "go"
   },
   "select": {
     "args": 1,
@@ -149,10 +174,9 @@
     "short": "sel",
     "desc": "Select a window by fuzzy title match.",
     "requires_window": false,
-    "file": "select.py",
-    "deps": [
-      "pywinctl"
-    ]
+    "file": "select.go",
+    "exe": ".wutil/goext/select.exe",
+    "runtime": "go"
   },
   "terminate": {
     "args": 0,
@@ -163,7 +187,8 @@
     "file": "term.py",
     "deps": [
       "psutil"
-    ]
+    ],
+    "runtime": "python"
   },
   "text": {
     "args": 1,
@@ -173,25 +198,20 @@
     "short": "txt",
     "desc": "An extension to output little tidbits of text that you use regularly.",
     "requires_window": false,
-    "file": "text.py"
+    "file": "text.go",
+    "exe": ".wutil/goext/text.exe",
+    "runtime": "go"
   },
   "update": {
     "args": 0,
     "arg_names": [],
     "short": "updt",
-    "desc": "Checks for and applies incremental updates from api.phi.me.uk",
+    "desc": "Checks for and applies incremental updates from hub.phi.me.uk",
     "requires_window": false,
     "file": "update.py",
     "deps": [
       "requests"
-    ]
-  },
-  "dev-build": {
-    "args": 0,
-    "arg_names": [],
-    "short": "build",
-    "desc": "Write hashes and exes for production build.",
-    "requires_window": false,
-    "file": "_dev-build.py"
+    ],
+    "runtime": "python"
   }
 }

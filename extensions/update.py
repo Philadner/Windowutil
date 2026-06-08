@@ -7,6 +7,7 @@ import sys
 import zipfile
 import tempfile
 import shutil
+import base64
 import json
 import hashlib
 import subprocess
@@ -14,6 +15,7 @@ import time
 from pathlib import Path
 from wutildeps import deps
 log = debugutils.log
+UPDATE_URL = "https://hub.phi.me.uk/update/windowutil"
 
 
 def md5_hash(file_path: Path) -> str:
@@ -87,10 +89,47 @@ if exe.exists():
     sys.exit(0)
 
 
+def _safe_relative_path(rel_path):
+    path = Path(rel_path)
+    if path.is_absolute() or ".." in path.parts:
+        return None
+    return path
+
+
+def _write_patch_files(files, extracted_root):
+    written = []
+    for item in files:
+        rel_path = _safe_relative_path(item.get("path", ""))
+        if rel_path is None:
+            continue
+
+        if item.get("encoding") != "base64":
+            continue
+
+        dest = extracted_root / rel_path
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(base64.b64decode(item.get("content", "")))
+        written.append(rel_path.as_posix())
+    return written
+
+
+def _remove_deleted_files(root_dir, removed_files):
+    removed = []
+    for rel in removed_files or []:
+        rel_path = _safe_relative_path(rel)
+        if rel_path is None:
+            continue
+        target = root_dir / rel_path
+        if target.exists() and target.is_file():
+            target.unlink()
+            removed.append(rel_path.as_posix())
+    return removed
+
+
 class Extension:
     def __init__(self):
         self.name = "update"
-        self.desc = "Checks for and applies incremental updates from api.phi.me.uk"
+        self.desc = "Checks for and applies incremental updates from hub.phi.me.uk"
         self.args = []
         self.short = "updt"
         self.requires_window = False
@@ -114,7 +153,21 @@ class Extension:
         # --- Fetch release info from Cloudflare Worker ---
         mark("start update fetch", important=False, source="update")
         try:
-            resp = requests.get(f"https://api.phi.me.uk/update/windowutil?version={version}")
+            local_update_file = root_dir / "update.json"
+            if local_update_file.exists():
+                try:
+                    local_manifest = json.loads(local_update_file.read_text(encoding="utf-8"))
+                except Exception:
+                    local_manifest = {"version": version, "files": {}}
+            else:
+                local_manifest = {"version": version, "files": {}}
+
+            resp = requests.post(
+                f"{UPDATE_URL}?version={version}",
+                json=local_manifest,
+                timeout=60,
+            )
+            resp.raise_for_status()
             data = resp.json()
             message = data.get("message")
         except Exception as e:
@@ -127,39 +180,48 @@ class Extension:
             return
         
         latest = data.get("latestVersion", "?")
+        patch_files = data.get("files")
         zip_url = data.get("download")
         log(f"update available current={version} latest={latest}", source="update")
         print(message)
-        print("📦 Downloading package...")
         mark("end update fetch", important=False, source="update")
-        # --- Download the release zip ---
-        try:
-            r = requests.get(zip_url, stream=True)
-            r.raise_for_status()
-            tmp_zip = Path(tempfile.gettempdir()) / "windowutil_update.zip"
-            with open(tmp_zip, "wb") as f:
-                for chunk in r.iter_content(8192):
-                    f.write(chunk)
-        except Exception as e:
-            print(f"❌ Failed to download update: {e}")
-            log(f"update download failed: {e}", source="update")
-            return
 
-        # --- Extract the zip ---
         tmp_extract = Path(tempfile.mkdtemp(prefix="windowutil_update_"))
-        with zipfile.ZipFile(tmp_zip, "r") as zip_ref:
-            zip_ref.extractall(tmp_extract)
+        extracted_root = tmp_extract / "patch"
+        extracted_root.mkdir(parents=True, exist_ok=True)
 
-        extracted_root = next(tmp_extract.iterdir())
-
-        # --- Read remote update.json (hash map) ---
-        remote_update_file = extracted_root / "update.json"
-        if not remote_update_file.exists():
-            print("⚠️ No update.json found in release. Falling back to full update.")
-            log("downloaded update had no update.json", source="update")
-            remote_hashes = None
+        if isinstance(patch_files, list):
+            print("📦 Downloading changed files...")
+            _write_patch_files(patch_files, extracted_root)
+            update_manifest = data.get("updateManifest") or {}
+            remote_hashes = update_manifest.get("files", {})
         else:
-            remote_hashes = json.loads(remote_update_file.read_text())["files"]
+            print("📦 Downloading package...")
+            try:
+                r = requests.get(zip_url, stream=True)
+                r.raise_for_status()
+                tmp_zip = Path(tempfile.gettempdir()) / "windowutil_update.zip"
+                with open(tmp_zip, "wb") as f:
+                    for chunk in r.iter_content(8192):
+                        f.write(chunk)
+            except Exception as e:
+                print(f"❌ Failed to download update: {e}")
+                log(f"update download failed: {e}", source="update")
+                return
+
+            with zipfile.ZipFile(tmp_zip, "r") as zip_ref:
+                zip_ref.extractall(tmp_extract)
+
+            extracted_root = next(tmp_extract.iterdir())
+
+            # --- Read remote update.json (hash map) ---
+            remote_update_file = extracted_root / "update.json"
+            if not remote_update_file.exists():
+                print("⚠️ No update.json found in release. Falling back to full update.")
+                log("downloaded update had no update.json", source="update")
+                remote_hashes = None
+            else:
+                remote_hashes = json.loads(remote_update_file.read_text())["files"]
 
         # --- Compare with local hashes (if available) ---
         local_hashes = {}
@@ -218,6 +280,7 @@ class Extension:
             }, indent=2))
 
         (root_dir / "version.json").write_text(json.dumps({"version": latest}, indent=2))
+        removed = _remove_deleted_files(root_dir, data.get("removed", []))
 
         print("\n✅ Update complete!\n")
         log(f"update finished changed={len(changed)} identical={len(identical)} skipped={len(skipped)}", source="update")
@@ -235,6 +298,10 @@ class Extension:
                 print(f"  - {f}")
             launch_update_worker(skipped, extracted_root, root_dir)
             return
+        if removed:
+            print("\n🗑️ Removed old files:")
+            for f in removed:
+                print(f"  - {f}")
 
         print(f"\n✨ Now running version {latest}")
         shutil.rmtree(tmp_extract, ignore_errors=True)

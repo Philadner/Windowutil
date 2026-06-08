@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .venv/
+.wutil/
 manifest.json
 extentions/__pycache__/
 build/wutil
