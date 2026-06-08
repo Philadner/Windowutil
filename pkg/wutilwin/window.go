@@ -40,6 +40,8 @@ const (
 	vkUp     = 0x26
 	vkRight  = 0x27
 	vkDown   = 0x28
+
+	processQueryLimitedInformation = 0x1000
 )
 
 var (
@@ -53,6 +55,12 @@ var (
 	procGetSystemMetrics  = user32.NewProc("GetSystemMetrics")
 	procGetAsyncKeyState  = user32.NewProc("GetAsyncKeyState")
 	procSetProcessDPI     = user32.NewProc("SetProcessDPIAware")
+	procGetWindowPID      = user32.NewProc("GetWindowThreadProcessId")
+
+	kernel32                  = syscall.NewLazyDLL("kernel32.dll")
+	procOpenProcess           = kernel32.NewProc("OpenProcess")
+	procCloseHandle           = kernel32.NewProc("CloseHandle")
+	procQueryFullProcessImage = kernel32.NewProc("QueryFullProcessImageNameW")
 )
 
 func init() {
@@ -151,6 +159,45 @@ func (win Window) Title() string {
 		return win.title
 	}
 	return titleOf(win.Handle)
+}
+
+func (win Window) ProcessID() uint32 {
+	var pid uint32
+	procGetWindowPID.Call(win.Handle, uintptr(unsafe.Pointer(&pid)))
+	return pid
+}
+
+func (win Window) ExePath() string {
+	pid := win.ProcessID()
+	if pid == 0 {
+		return ""
+	}
+	handle, _, _ := procOpenProcess.Call(processQueryLimitedInformation, 0, uintptr(pid))
+	if handle == 0 {
+		return ""
+	}
+	defer procCloseHandle.Call(handle)
+
+	buffer := make([]uint16, syscall.MAX_PATH*4)
+	size := uint32(len(buffer))
+	ret, _, _ := procQueryFullProcessImage.Call(
+		handle,
+		0,
+		uintptr(unsafe.Pointer(&buffer[0])),
+		uintptr(unsafe.Pointer(&size)),
+	)
+	if ret == 0 {
+		return ""
+	}
+	return syscall.UTF16ToString(buffer[:size])
+}
+
+func (win Window) ExeName() string {
+	exePath := win.ExePath()
+	if exePath == "" {
+		return ""
+	}
+	return filepath.Base(exePath)
 }
 
 func (win Window) Bounds() (Bounds, error) {

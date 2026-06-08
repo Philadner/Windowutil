@@ -178,6 +178,20 @@
     "exe": ".wutil/goext/select.exe",
     "runtime": "go"
   },
+  "state": {
+    "args": 3,
+    "arg_names": [
+      "action",
+      "subaction",
+      "target"
+    ],
+    "short": "s",
+    "desc": "Save and restore groups of window positions.",
+    "requires_window": false,
+    "file": "state.go",
+    "exe": ".wutil/goext/state.exe",
+    "runtime": "go"
+  },
   "terminate": {
     "args": 0,
     "arg_names": [],

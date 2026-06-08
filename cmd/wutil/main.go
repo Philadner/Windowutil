@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -367,6 +370,10 @@ type goMeta struct {
 	entry ManifestEntry
 }
 
+type goExtensionBuildState struct {
+	Hashes map[string]string `json:"hashes"`
+}
+
 func metadataFromPython(path, file string) (pyMeta, bool) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -479,12 +486,91 @@ func buildGoExtension(root string, file string, name string, exeRel string) erro
 		return err
 	}
 	sourcePath := filepath.Join(root, "extensions", file)
+	hash, err := goExtensionHash(root, sourcePath)
+	if err != nil {
+		return err
+	}
+	statePath := filepath.Join(root, ".wutil", "goext", "build_state.json")
+	state := readGoExtensionBuildState(statePath)
+	if state.Hashes[name] == hash {
+		if _, err := os.Stat(exePath); err == nil {
+			logDebug(fmt.Sprintf("Go extension %s unchanged; skipping build", name), false, "loader-go")
+			return nil
+		}
+	}
+
+	logDebug(fmt.Sprintf("building Go extension %s", name), true, "loader-go")
 	cmd := exec.Command("go", "build", "-o", exePath, sourcePath)
 	cmd.Dir = root
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Env = os.Environ()
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	state.Hashes[name] = hash
+	return writeGoExtensionBuildState(statePath, state)
+}
+
+func goExtensionHash(root string, sourcePath string) (string, error) {
+	inputs := []string{sourcePath}
+	if err := filepath.WalkDir(filepath.Join(root, "pkg"), func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(entry.Name(), ".go") {
+			inputs = append(inputs, path)
+		}
+		return nil
+	}); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return "", err
+	}
+	for _, path := range []string{filepath.Join(root, "go.mod"), filepath.Join(root, "go.sum")} {
+		if _, err := os.Stat(path); err == nil {
+			inputs = append(inputs, path)
+		}
+	}
+	sort.Strings(inputs)
+
+	hasher := sha256.New()
+	for _, path := range inputs {
+		rel, _ := filepath.Rel(root, path)
+		hasher.Write([]byte(filepath.ToSlash(rel)))
+		hasher.Write([]byte{0})
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return "", err
+		}
+		hasher.Write(data)
+		hasher.Write([]byte{0})
+	}
+	return hex.EncodeToString(hasher.Sum(nil)), nil
+}
+
+func readGoExtensionBuildState(path string) goExtensionBuildState {
+	state := goExtensionBuildState{Hashes: map[string]string{}}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return state
+	}
+	if err := json.Unmarshal(data, &state); err != nil || state.Hashes == nil {
+		return goExtensionBuildState{Hashes: map[string]string{}}
+	}
+	return state
+}
+
+func writeGoExtensionBuildState(path string, state goExtensionBuildState) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+	data, err := json.MarshalIndent(state, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0644)
 }
 
 func literalString(raw string) string {

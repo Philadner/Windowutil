@@ -1,7 +1,7 @@
 {
   "version": "1.11.5",
   "files": {
-    ".build_state.json": "8e69d03d1e83dd7f1dec7de3e60e3127",
+    ".build_state.json": "1b68f82316f5ccfae7676378f461bbe7",
     "animations.py": "c7c3f0fcebe8e04c803a74e90f657104",
     "build.py": "72abfa3d2331a08c22b5c34b5bc560a6",
     "config.ini": "652f60d6910320f7dc3112702faf9fca",
@@ -9,7 +9,7 @@
     "debugutils.py": "4899bd76f3b1a65bf70781b77d6a7a93",
     "go.mod": "73d0788da7284b430166517a48d5be10",
     "go.sum": "0f68d073a47c713d26e2bef9e5e09500",
-    "manifest.json": "62cd663dd458b4646c197c87f8408aa0",
+    "manifest.json": "fb80eb66d023dd5b85e5e66395643ae4",
     "manifest.old.json": "4fe832d6226f80e9ccd0aee4fb3d8159",
     "poetry.lock": "96b93564c28db07fc71de692f55b560a",
     "pyproject.toml": "c548b9de1cc624b1f0185358a0117ade",
@@ -35,7 +35,7 @@
     "build/wutil/localpycs/pyimod03_ctypes.pyc": "d0866106da518ace1b77598c22cb9461",
     "build/wutil/localpycs/pyimod04_pywin32.pyc": "95c2ea37b3dfbe31e8d38adaa873315e",
     "build/wutil/localpycs/struct.pyc": "21c500d95db7569c0fe4ca7841d3fe22",
-    "cmd/wutil/main.go": "0f8337cc5a2341d950be0c1168923b2c",
+    "cmd/wutil/main.go": "212e72ec4559610c2aaf0bd24151fc5a",
     "extensions/centre.go": "2c25fdb7090a05e7b8afc86b1bb88ee5",
     "extensions/example.py": "a5a147f1072ea504ab0a589d59b9abac",
     "extensions/failure.py": "010f50bf5bf97e7a17ef18b867c06025",
@@ -48,11 +48,12 @@
     "extensions/resize.go": "98739f542558ebd54c4a2589e5eacd72",
     "extensions/run.go": "93b382c36814e4da3c3073363301c3b2",
     "extensions/select.go": "dacda10ca41366c57bf58f63329809c6",
+    "extensions/state.go": "4512394baaa27a6e5376e41085d720da",
     "extensions/term.py": "b5c37ab88384d9d39b4418a3a44c5574",
     "extensions/text.go": "9566a92096b205143d11eca8748be1c2",
     "extensions/update.py": "eb49fe4d01b2333a2986960ff9828620",
     "extensions/_dev-build.py": "3f39ae07850d9309675734d503dd2f0d",
     "pkg/wutilext/wutilext.go": "9b448495a904a446e655244d7b038e24",
-    "pkg/wutilwin/window.go": "200ecb07ae97fcec8ba7d00a2c01de22"
+    "pkg/wutilwin/window.go": "d7d61d4c39f7c0d5091d7c4ac347b901"
   }
 }
