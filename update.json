@@ -1,7 +1,7 @@
 {
-  "version": "1.11.5",
+  "version": "2.00.0",
   "files": {
-    ".build_state.json": "1b68f82316f5ccfae7676378f461bbe7",
+    ".build_state.json": "2afc6fa451e989bca0809f3f7eabcbdb",
     "animations.py": "c7c3f0fcebe8e04c803a74e90f657104",
     "build.py": "72abfa3d2331a08c22b5c34b5bc560a6",
     "config.ini": "652f60d6910320f7dc3112702faf9fca",
@@ -17,7 +17,7 @@
     "settings.json": "26b6bd73f7aad2d9ca439f0cd5e85963",
     "state.py": "f1193a184aba28f7bf52f54c2b345288",
     "uv.lock": "9de803d9424062649880902cc588b0eb",
-    "version.json": "f1dd893f5d41eebda3b4d65bc6f49fe8",
+    "version.json": "fa41cbe28a0f02b3d0f9c2c3825caa9c",
     "wutil.spec": "bf6744b35c4d0e1fd572d4d32753b68d",
     "wutildeps.py": "55ee9c545f1ec8be590ca8ed4b4d319c",
     "wutilerror.py": "e410b96681285c10f08ad32c59ea85a7",
