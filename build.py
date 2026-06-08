@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parent
 OUTFILE = ROOT / "update.json"
 STATEFILE = ROOT / ".build_state.json"
 VERSION_FILE = ROOT / "version.json"
-IGNORE = {".git", ".venv", ".wutil", "__pycache__", "update.json", ".gitignore", ".gitattributes", "dist"}
+IGNORE = {".git", ".venv", ".wutil", "Installertest", "__pycache__", "update.json", ".gitignore", ".gitattributes", "dist", ".windowutil_state.json"}
 VERSION = "0.0.0"
 
 # --- Hashing helper ---

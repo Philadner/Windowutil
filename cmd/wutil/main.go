@@ -262,8 +262,7 @@ func findRoot() (string, error) {
 func looksLikeRoot(path string) bool {
 	_, extErr := os.Stat(filepath.Join(path, "extensions"))
 	_, runnerErr := os.Stat(filepath.Join(path, "python_runner.py"))
-	_, pyErr := os.Stat(filepath.Join(path, "windowutil.py"))
-	return extErr == nil && (runnerErr == nil || pyErr == nil)
+	return extErr == nil && runnerErr == nil
 }
 
 func loadManifest(root string, argv []string) (manifest, error) {

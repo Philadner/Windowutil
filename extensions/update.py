@@ -1,7 +1,7 @@
 import time
 import debugutils
 mark = debugutils.mark_time
-mark("import loader.py")
+mark("import update.py")
 import os
 import sys
 import zipfile
@@ -259,8 +259,6 @@ class Extension:
 
             # skip locked core files
             if dest_path.name.lower() in (
-                "windowutil.py", 
-                "loader.py", 
                 "update.py", 
                 "wutil.exe", 
                 "_update_worker.py"
